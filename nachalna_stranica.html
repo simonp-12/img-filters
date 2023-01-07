@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Filters</title>
+    <script>
+        let canvas, context, img;
+        function onBodyLoad() {
+            canvas = document.getElementById("my-canvas-1");
+            // така зареждаме картинка
+            img = new Image();
+            // img.src = "./kartinki/img1.jpg";
+            img.src = "./kartinki/" + prompt("DAI MI IME NA KARTINKA", "img1.jpg");
+
+            function green(r, g, b, a) {
+                return {
+                    r:0,
+                    g:g,
+                    b:0,
+                    a:a
+                }
+            }
+            function red(r, g, b, a) {
+                return {
+                    r:r,
+                    g:0,
+                    b:0,
+                    a:a
+                }
+            }
+            function blue(r, g, b, a) {
+                return {
+                    r:0,
+                    g:0,
+                    b:b,
+                    a:a
+                }
+            }
+            function grayscale(r, g, b, a) {
+                let gray = ((0.3 * r) + (0.59 * g) + (0.11 * b));
+                return {
+                    r: gray,
+                    g: gray,
+                    b: gray,
+                    a: a
+                }
+            }
+            function invert(r, g, b, a) {
+                return {
+                    r: 255-r,
+                    g: 255-g,
+                    b: 255-b,
+                    a: a
+                }
+            }
+            context = canvas.getContext("2d");
+            // Когато картинката изцяло се зареди
+            img.onload = function () {
+                // Тук кодя
+                context.drawImage(img, 0, 0, 600, 600);
+                let old_data = context.getImageData(0, 0, 600, 600);
+                // Масив от цветове
+                let old_rgba_arr = old_data.data;
+                let new_rgba_arr = [];
+                // Копираме стария масив на цветовете в нов
+                // Правим промени
+                let filter_name = prompt("KAKUV GROZEN FILTUR ISKASH?", "red, green, blue, invert, grayscale");
+                let functions = {
+                    invert: invert,
+                    green: green,
+                    red: red,
+                    grayscale: grayscale,
+                    blue: blue
+                }
+                let cur_fun = functions[filter_name];
+                for(let i = 0; i < 600*600*4; i+=4) {
+                    let res = cur_fun(old_rgba_arr[i], old_rgba_arr[i+1], old_rgba_arr[i+2], old_rgba_arr[i+3])
+                    new_rgba_arr[i] = res.r;      // Червено
+                    new_rgba_arr[i+1] = res.g;  // Зелено
+                    new_rgba_arr[i+2] = res.b;  // синьо
+                    new_rgba_arr[i+3] = res.a;  // Прозрачност
+                }
+
+                // Създавам нов image_data с новия масив от числа
+                let new_data = new ImageData(
+                    new Uint8ClampedArray(new_rgba_arr),
+                    600, 600
+                );
+                // Рисуваме новия image_data върху canvas-a
+                context.putImageData(new_data, 0, 0);
+            }
+            
+
+        }
+    </script>
+</head>
+<body onload="onBodyLoad()">
+    <h1>Image Filters</h1>
+    <canvas width="600px" height="600px" id="my-canvas-1"></canvas>
+</body>
+</html>
